@@ -12,13 +12,15 @@ import java.util.List;
 public class Product {
 
     @Id
-    private String id;
+    private Long id;
 
     private String name;
     private double price;
 
     private List<ArticleQuantity> containArticles;
 
+    @Setter
+    @Getter
     public static class ArticleQuantity {
         String articleId;
         int quantity;
