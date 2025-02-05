@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -36,12 +37,12 @@ public class ProductController {
     @PatchMapping("/{id}")
     public ResponseEntity<String> sellProduct(@PathVariable Long id) {
         try {
-            if (productService.sell(id)) {
-                return ResponseEntity.ok("Product sold successfully.");
-            } else {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("Out of stock.");
-            }
-        } catch (Exception e) {
+            productService.sell(id);
+            return ResponseEntity.ok("Product sold successfully.");
+        } catch (HttpStatusCodeException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getMessage());
+        }
+        catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to sell product: " + e.getMessage());
         }
     }

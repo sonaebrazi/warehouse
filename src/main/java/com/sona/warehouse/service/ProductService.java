@@ -1,5 +1,6 @@
 package com.sona.warehouse.service;
 
+import com.sona.warehouse.exceptions.ProductNotFoundException;
 import com.sona.warehouse.model.Product;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +17,8 @@ public class ProductService {
         return null;
     }
 
-    synchronized public boolean sell(Long id) {
+    synchronized public void sell(Long id) {
         // TODO: implement
-        return false;
+        throw new ProductNotFoundException(id);
     }
 }
