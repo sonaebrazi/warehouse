@@ -1,5 +1,7 @@
 package com.sona.warehouse.service;
 
+import com.sona.warehouse.dto.ProductArticleDTO;
+import com.sona.warehouse.dto.ProductDTO;
 import com.sona.warehouse.exceptions.ArticleNotFoundException;
 import com.sona.warehouse.exceptions.ProductNotFoundException;
 import com.sona.warehouse.exceptions.ProductSoldOutException;
@@ -27,19 +29,43 @@ public class ProductService {
         this.inventoryRepository = inventoryRepository;
     }
 
-    public void saveAll(List<Product> products) {
-        for (Product product : products) {
-            Optional<Product> existingProduct = productRepository.findByName(product.getName());
+    public void saveAll(List<ProductDTO> productDTOs) {
+        for (ProductDTO productDTO : productDTOs) {
+            System.out.println(productDTO);
+            Optional<Product> existingProduct = productRepository.findByName(productDTO.getName());
 
             if (existingProduct.isPresent()) {
                 Product existing = existingProduct.get();
-                existing.setPrice(product.getPrice());
-                existing.setContainArticles(product.getContainArticles());
+                existing.setPrice(productDTO.getPrice());
+                existing.setContainArticles(
+                        productDTO.getContainArticles().stream()
+                                .map(this::toModel)
+                                .collect(Collectors.toList())
+                );
                 productRepository.save(existing);
             } else {
-                productRepository.save(product);
+                productRepository.save(toModel(productDTO));
             }
         }
+    }
+
+    private Product toModel(ProductDTO productDTO) {
+        return Product.builder()
+                .name(productDTO.getName())
+                .price(productDTO.getPrice())
+                .containArticles(
+                        productDTO.getContainArticles().stream()
+                                .map(this::toModel)
+                                .collect(Collectors.toList())
+                )
+                .build();
+    }
+
+    private Product.ArticleQuantity toModel(ProductArticleDTO articleDTO) {
+        return Product.ArticleQuantity.builder()
+                .articleId(articleDTO.getArticleId())
+                .quantity(Integer.parseInt(articleDTO.getAmountOf()))
+                .build();
     }
 
     public List<Product> findAll() {
@@ -51,7 +77,7 @@ public class ProductService {
     }
 
     @Transactional
-    public void sell(Long id) {
+    public void sell(String id) {
         Optional<Product> productOpt = productRepository.findById(id);
 
         if (productOpt.isEmpty()) {

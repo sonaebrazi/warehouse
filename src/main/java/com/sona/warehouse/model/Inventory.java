@@ -11,8 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Inventory {
 
     @Id
-    private String id;
-
+    private String articleId;
     private String name;
-    private int stock;
+    private Long stock;
 }

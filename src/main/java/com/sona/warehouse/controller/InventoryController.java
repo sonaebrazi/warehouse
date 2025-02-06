@@ -3,6 +3,7 @@ package com.sona.warehouse.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sona.warehouse.dto.InventoryDTO;
 import com.sona.warehouse.model.Inventory;
 import com.sona.warehouse.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +38,9 @@ public class InventoryController {
         }
 
         try {
-            List<Inventory> inventories = objectMapper.readValue(file.getBytes(), objectMapper.getTypeFactory().constructCollectionType(List.class, Inventory.class));
+            InventoryDTO inventory = objectMapper.readValue(file.getBytes(), objectMapper.getTypeFactory().constructType(InventoryDTO.class));
 
-            inventoryService.saveAll(inventories);
+            inventoryService.saveAll(inventory);
             return ResponseEntity.ok("Inventory uploaded successfully!");
 
         } catch (JsonMappingException e) {

@@ -3,13 +3,14 @@ package com.sona.warehouse.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sona.warehouse.dto.ProductUploadDTO;
+import com.sona.warehouse.exceptions.CustomHttpStatusCodeException;
 import com.sona.warehouse.model.Product;
 import com.sona.warehouse.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -35,12 +36,12 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> sellProduct(@PathVariable Long id) {
+    public ResponseEntity<String> sellProduct(@PathVariable String id) {
         try {
             productService.sell(id);
             return ResponseEntity.ok("Product sold successfully.");
-        } catch (HttpStatusCodeException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(e.getMessage());
+        } catch (CustomHttpStatusCodeException e) {
+            return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
         }
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to sell product: " + e.getMessage());
@@ -56,10 +57,11 @@ public class ProductController {
         try {
             // Check if the file content is valid JSON
             byte[] bytes = file.getBytes();
-            List<Product> products = objectMapper.readValue(bytes, objectMapper.getTypeFactory().constructCollectionType(List.class, Product.class));
 
+            ProductUploadDTO uploaded = objectMapper.readValue(bytes, objectMapper.getTypeFactory().constructType(ProductUploadDTO.class));
+            System.out.println(uploaded);
             // Save all products
-            productService.saveAll(products);
+            productService.saveAll(uploaded.getProducts());
             return ResponseEntity.ok("Products uploaded successfully!");
 
         } catch (JsonMappingException e) {

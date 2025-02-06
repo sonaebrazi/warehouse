@@ -28,7 +28,7 @@ class InventoryRepositoryTest extends BaseRepositoryTest {
     @Test
     void saveAndFindArticle() {
         // Given an inventory item
-        Inventory article = createInventoryItem("Leg", 12);
+        Inventory article = createInventoryItem("Leg", 12L);
 
         // When saving the item
         inventoryRepository.save(article);
@@ -40,15 +40,15 @@ class InventoryRepositoryTest extends BaseRepositoryTest {
     @Test
     void updateInventoryItem() {
         // Given an inventory item
-        Inventory article = createInventoryItem("Screw", 15);
+        Inventory article = createInventoryItem("Screw", 15L);
         article = inventoryRepository.save(article);
 
         // When updating the item's stock
-        article.setStock(20);
+        article.setStock(20L);
         inventoryRepository.save(article);
 
         // Then the updated item should be retrievable
-        Inventory updatedArticle = inventoryRepository.findById(article.getId()).orElse(null);
+        Inventory updatedArticle = inventoryRepository.findById(article.getArticleId()).orElse(null);
         assertNotNull(updatedArticle);
         assertEquals(20, updatedArticle.getStock());
     }
@@ -56,21 +56,21 @@ class InventoryRepositoryTest extends BaseRepositoryTest {
     @Test
     void deleteInventoryItem() {
         // Given an inventory item
-        Inventory article = createInventoryItem("Seat", 5);
+        Inventory article = createInventoryItem("Seat", 5L);
         article = inventoryRepository.save(article);
 
         // When deleting the item
-        inventoryRepository.deleteById(article.getId());
+        inventoryRepository.deleteById(article.getArticleId());
 
         // Then the item should not be present anymore
-        assertFalse(inventoryRepository.findById(article.getId()).isPresent());
+        assertFalse(inventoryRepository.findById(article.getArticleId()).isPresent());
     }
 
     @Test
     void findAllArticles() {
         // Given two inventory items
-        Inventory article1 = createInventoryItem("Table Top", 10);
-        Inventory article2 = createInventoryItem("Screw", 15);
+        Inventory article1 = createInventoryItem("Table Top", 10L);
+        Inventory article2 = createInventoryItem("Screw", 15L);
         inventoryRepository.save(article1);
         inventoryRepository.save(article2);
 
@@ -90,7 +90,7 @@ class InventoryRepositoryTest extends BaseRepositoryTest {
         assertNull(foundArticle);
     }
 
-    private Inventory createInventoryItem(String name, int stock) {
+    private Inventory createInventoryItem(String name, Long stock) {
         return Inventory.builder()
                 .name(name)
                 .stock(stock)
