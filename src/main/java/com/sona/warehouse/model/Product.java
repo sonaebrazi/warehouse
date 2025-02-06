@@ -9,6 +9,8 @@ import java.util.List;
 @Document(collection = "products")
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Product {
 
     @Id
@@ -24,9 +26,9 @@ public class Product {
     @Builder
     public static class ArticleQuantity {
         String articleId;
-        int quantity;
+        Long quantity;
 
-        public ArticleQuantity(String articleId, int quantity) {
+        public ArticleQuantity(String articleId, Long quantity) {
             this.articleId = articleId;
             this.quantity = quantity;
         }
