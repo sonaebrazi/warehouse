@@ -6,6 +6,10 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+/**
+ * Represents an inventory item in the warehouse.
+ * This class holds the details about a specific article in stock.
+ */
 @Document(collection = "inventory")
 @Data
 @Builder

@@ -17,18 +17,37 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service class responsible for managing product operations.
+ * This class handles the business logic related to products,
+ * including saving, retrieving, and selling products.
+ */
 @Service
 public class ProductService {
 
     private final ProductRepository productRepository;
     private final InventoryRepository inventoryRepository;
 
+    /**
+     * Constructs a ProductService with the specified ProductRepository
+     * and InventoryRepository.
+     *
+     * @param productRepository   the repository for accessing product data.
+     * @param inventoryRepository the repository for accessing inventory data.
+     */
     @Autowired
     public ProductService(ProductRepository productRepository, InventoryRepository inventoryRepository) {
         this.productRepository = productRepository;
         this.inventoryRepository = inventoryRepository;
     }
 
+    /**
+     * Saves all products provided in the list of ProductDTOs.
+     * This method updates existing products or creates new ones
+     * based on the provided product data.
+     *
+     * @param productDTOs the list of ProductDTOs to be saved.
+     */
     public void saveAll(List<ProductDTO> productDTOs) {
         for (ProductDTO productDTO : productDTOs) {
             System.out.println(productDTO);
@@ -49,6 +68,12 @@ public class ProductService {
         }
     }
 
+    /**
+     * Converts a ProductDTO to a Product model.
+     *
+     * @param productDTO the ProductDTO to be converted.
+     * @return the corresponding Product model.
+     */
     private Product toModel(ProductDTO productDTO) {
         return Product.builder()
                 .name(productDTO.getName())
@@ -61,6 +86,12 @@ public class ProductService {
                 .build();
     }
 
+    /**
+     * Converts a ProductArticleDTO to a Product.ArticleQuantity model.
+     *
+     * @param articleDTO the ProductArticleDTO to be converted.
+     * @return the corresponding Product.ArticleQuantity model.
+     */
     private Product.ArticleQuantity toModel(ProductArticleDTO articleDTO) {
         return Product.ArticleQuantity.builder()
                 .articleId(articleDTO.getArticleId())
@@ -68,6 +99,11 @@ public class ProductService {
                 .build();
     }
 
+    /**
+     * Retrieves all products and filters them based on their inventory availability.
+     *
+     * @return a list of available products.
+     */
     public List<Product> findAll() {
         List<Product> allProducts = productRepository.findAll();
 
@@ -76,6 +112,16 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Sells a product with the specified ID.
+     * This method checks if the product exists and if it is in stock,
+     * then deducts the required articles from the inventory.
+     *
+     * @param id the ID of the product to be sold.
+     * @throws ProductNotFoundException    if the product with the specified ID does not exist.
+     * @throws ProductSoldOutException      if the product is sold out.
+     * @throws ArticleNotFoundException     if an article required for the product is not found.
+     */
     @Transactional
     public void sell(String id) {
         Optional<Product> productOpt = productRepository.findById(id);
@@ -100,6 +146,12 @@ public class ProductService {
         });
     }
 
+    /**
+     * Checks the inventory availability for the specified product.
+     *
+     * @param product the product to check.
+     * @return true if all required articles are available in sufficient quantity; false otherwise.
+     */
     private boolean checkInventory(Product product) {
         return product.getContainArticles().stream()
                 .allMatch(articleQuantity -> {
