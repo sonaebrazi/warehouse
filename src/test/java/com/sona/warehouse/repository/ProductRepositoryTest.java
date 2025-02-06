@@ -60,7 +60,7 @@ class ProductRepositoryTest extends BaseRepositoryTest {
         product = productRepository.save(product);
 
         // When updating the product's price
-        product.setPrice(120);
+        product.setPrice(120.0);
         productRepository.save(product);
 
         // Then it should be updated in the repository
