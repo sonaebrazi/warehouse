@@ -64,7 +64,7 @@ public class ProductService {
     private Product.ArticleQuantity toModel(ProductArticleDTO articleDTO) {
         return Product.ArticleQuantity.builder()
                 .articleId(articleDTO.getArticleId())
-                .quantity(Integer.parseInt(articleDTO.getAmountOf()))
+                .quantity(Long.parseLong(articleDTO.getAmountOf()))
                 .build();
     }
 
@@ -104,7 +104,7 @@ public class ProductService {
         return product.getContainArticles().stream()
                 .allMatch(articleQuantity -> {
                     String articleId = articleQuantity.getArticleId();
-                    int quantityNeeded = articleQuantity.getQuantity();
+                    Long quantityNeeded = articleQuantity.getQuantity();
                     return inventoryRepository.findById(articleId)
                             .map(inventory -> inventory.getStock() >= quantityNeeded)
                             .orElse(false);

@@ -129,9 +129,9 @@ class ProductRepositoryTest extends BaseRepositoryTest {
                 .name(name)
                 .price(price)
                 .containArticles(Arrays.asList(
-                        new Product.ArticleQuantity("1", 4),
-                        new Product.ArticleQuantity("2", 8),
-                        new Product.ArticleQuantity("3", 1)
+                        new Product.ArticleQuantity("1", 4L),
+                        new Product.ArticleQuantity("2", 8L),
+                        new Product.ArticleQuantity("3", 1L)
                 ))
                 .build();
     }
