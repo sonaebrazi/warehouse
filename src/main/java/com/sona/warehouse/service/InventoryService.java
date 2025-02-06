@@ -9,16 +9,33 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Service class responsible for managing inventory operations.
+ * This class handles the business logic related to inventory items,
+ * including saving and updating inventory articles.
+ */
 @Service
 public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
 
+    /**
+     * Constructs an InventoryService with the specified InventoryRepository.
+     *
+     * @param inventoryRepository the repository for accessing inventory data.
+     */
     @Autowired
     public InventoryService(InventoryRepository inventoryRepository) {
         this.inventoryRepository = inventoryRepository;
     }
 
+    /**
+     * Saves all inventory articles provided in the InventoryDTO.
+     * This method updates existing inventory articles or creates new ones
+     * based on the provided inventory data.
+     *
+     * @param inventory the DTO containing a list of inventory articles to be saved.
+     */
     public void saveAll(InventoryDTO inventory) {
         for (InventoryArticleDTO articleDTO : inventory.getInventory()) {
             Optional<Inventory> existingInventory = inventoryRepository.findById(articleDTO.getArticleId());
@@ -33,6 +50,12 @@ public class InventoryService {
         }
     }
 
+    /**
+     * Converts an InventoryArticleDTO to an Inventory model.
+     *
+     * @param articleDTO the InventoryArticleDTO to be converted.
+     * @return the corresponding Inventory model.
+     */
     private Inventory toModel(InventoryArticleDTO articleDTO) {
         return Inventory.builder()
                 .articleId(articleDTO.getArticleId())

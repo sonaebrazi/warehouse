@@ -6,6 +6,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
+/**
+ * Represents a product in the warehouse.
+ */
 @Document(collection = "products")
 @Data
 @Builder
@@ -21,6 +24,9 @@ public class Product {
 
     private List<ArticleQuantity> containArticles;
 
+    /**
+     * Represents the quantity of an article in the product.
+     */
     @Setter
     @Getter
     @Builder
