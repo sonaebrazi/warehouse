@@ -4,6 +4,8 @@ import com.sona.warehouse.dto.InventoryArticleDTO;
 import com.sona.warehouse.dto.InventoryDTO;
 import com.sona.warehouse.model.Inventory;
 import com.sona.warehouse.repository.InventoryRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ import java.util.Optional;
 @Service
 public class InventoryService {
 
+    private static final Logger logger = LoggerFactory.getLogger(InventoryService.class);
     private final InventoryRepository inventoryRepository;
 
     /**
@@ -37,6 +40,8 @@ public class InventoryService {
      * @param inventory the DTO containing a list of inventory articles to be saved.
      */
     public void saveAll(InventoryDTO inventory) {
+        logger.info("Saving inventory with {} items", inventory.getInventory().size());
+
         for (InventoryArticleDTO articleDTO : inventory.getInventory()) {
             Optional<Inventory> existingInventory = inventoryRepository.findById(articleDTO.getArticleId());
 
@@ -44,8 +49,10 @@ public class InventoryService {
                 Inventory existing = existingInventory.get();
                 existing.setStock(existing.getStock() + Long.parseLong(articleDTO.getStock()));
                 inventoryRepository.save(existing);
+                logger.debug("Updated stock for articleId {}: new stock {}", articleDTO.getArticleId(), existing.getStock());
             } else {
                 inventoryRepository.save(toModel(articleDTO));
+                logger.info("Added new inventory item: {}", articleDTO.getArticleId());
             }
         }
     }

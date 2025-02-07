@@ -9,6 +9,8 @@ import com.sona.warehouse.model.Inventory;
 import com.sona.warehouse.model.Product;
 import com.sona.warehouse.repository.InventoryRepository;
 import com.sona.warehouse.repository.ProductRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class ProductService {
+    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
     private final ProductRepository productRepository;
     private final InventoryRepository inventoryRepository;
@@ -49,8 +52,8 @@ public class ProductService {
      * @param productDTOs the list of ProductDTOs to be saved.
      */
     public void saveAll(List<ProductDTO> productDTOs) {
+        logger.info("Saving {} products", productDTOs.size());
         for (ProductDTO productDTO : productDTOs) {
-            System.out.println(productDTO);
             Optional<Product> existingProduct = productRepository.findByName(productDTO.getName());
 
             if (existingProduct.isPresent()) {
@@ -105,6 +108,7 @@ public class ProductService {
      * @return a list of available products.
      */
     public List<Product> findAll() {
+        logger.info("Fetching all available products.");
         List<Product> allProducts = productRepository.findAll();
 
         return allProducts.stream()
@@ -118,21 +122,24 @@ public class ProductService {
      * then deducts the required articles from the inventory.
      *
      * @param id the ID of the product to be sold.
-     * @throws ProductNotFoundException    if the product with the specified ID does not exist.
-     * @throws ProductSoldOutException      if the product is sold out.
-     * @throws ArticleNotFoundException     if an article required for the product is not found.
+     * @throws ProductNotFoundException if the product with the specified ID does not exist.
+     * @throws ProductSoldOutException  if the product is sold out.
+     * @throws ArticleNotFoundException if an article required for the product is not found.
      */
     @Transactional
     public void sell(String id) {
+        logger.info("Processing sale for product ID: {}", id);
         Optional<Product> productOpt = productRepository.findById(id);
 
         if (productOpt.isEmpty()) {
+            logger.warn("Product with ID {} not found!", id);
             throw new ProductNotFoundException(id);
         }
 
         Product product = productOpt.get();
 
         if (!checkInventory(product)) {
+            logger.warn("Product with ID {} is sold out!", id);
             throw new ProductSoldOutException(id);
         }
 
@@ -143,6 +150,7 @@ public class ProductService {
 
             inventory.setStock(inventory.getStock() - articleQuantity.getQuantity());
             inventoryRepository.save(inventory);
+            logger.debug("Reduced stock for article ID {}: new stock {}", articleQuantity.getArticleId(), inventory.getStock());
         });
     }
 

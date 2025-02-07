@@ -85,7 +85,6 @@ public class ProductController {
             byte[] bytes = file.getBytes();
 
             ProductUploadDTO uploaded = objectMapper.readValue(bytes, objectMapper.getTypeFactory().constructType(ProductUploadDTO.class));
-            System.out.println(uploaded);
             // Save all products
             productService.saveAll(uploaded.getProducts());
             return ResponseEntity.ok("Products uploaded successfully!");
