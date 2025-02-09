@@ -51,6 +51,7 @@ public class ProductService {
      *
      * @param productDTOs the list of ProductDTOs to be saved.
      */
+    @Transactional
     public void saveAll(List<ProductDTO> productDTOs) {
         logger.info("Saving {} products", productDTOs.size());
         for (ProductDTO productDTO : productDTOs) {

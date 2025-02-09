@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -39,6 +40,7 @@ public class InventoryService {
      *
      * @param inventory the DTO containing a list of inventory articles to be saved.
      */
+    @Transactional
     public void saveAll(InventoryDTO inventory) {
         logger.info("Saving inventory with {} items", inventory.getInventory().size());
 
