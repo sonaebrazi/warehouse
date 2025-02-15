@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sona.warehouse.dto.ProductUploadDTO;
+import com.sona.warehouse.dto.SellableProductDTO;
 import com.sona.warehouse.exceptions.CustomHttpStatusCodeException;
-import com.sona.warehouse.model.Product;
 import com.sona.warehouse.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,8 +45,8 @@ public class ProductController {
      * @return a ResponseEntity containing the list of products and an OK status
      */
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.findAll();
+    public ResponseEntity<List<SellableProductDTO>> getAllProducts() {
+        List<SellableProductDTO> products = productService.findAll();
         return ResponseEntity.ok(products);
     }
 

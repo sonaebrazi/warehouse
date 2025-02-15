@@ -5,6 +5,7 @@ import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
 import com.sona.warehouse.dto.ProductArticleDTO;
 import com.sona.warehouse.dto.ProductDTO;
+import com.sona.warehouse.dto.SellableProductDTO;
 import com.sona.warehouse.exceptions.ProductNotFoundException;
 import com.sona.warehouse.exceptions.ProductSoldOutException;
 import com.sona.warehouse.model.Inventory;
@@ -96,7 +97,7 @@ class IntegrationTest {
         inventoryRepository.save(new Inventory("2", "Screws", 2L)); // Not enough stock
 
         // When
-        List<Product> availableProducts = productService.findAll();
+        List<SellableProductDTO> availableProducts = productService.findAll();
 
         // Then
         assertEquals(0, availableProducts.size()); // Should be empty due to insufficient stock

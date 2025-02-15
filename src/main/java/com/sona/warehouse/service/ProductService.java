@@ -2,6 +2,7 @@ package com.sona.warehouse.service;
 
 import com.sona.warehouse.dto.ProductArticleDTO;
 import com.sona.warehouse.dto.ProductDTO;
+import com.sona.warehouse.dto.SellableProductDTO;
 import com.sona.warehouse.exceptions.ArticleNotFoundException;
 import com.sona.warehouse.exceptions.CustomNumberFormatException;
 import com.sona.warehouse.exceptions.ProductNotFoundException;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -116,12 +118,35 @@ public class ProductService {
      *
      * @return a list of available products.
      */
-    public List<Product> findAll() {
+    public List<SellableProductDTO> findAll() {
         logger.info("Fetching all available products.");
         List<Product> allProducts = productRepository.findAll();
 
         return allProducts.stream()
-                .filter(this::checkInventory)
+                .map(product -> {
+                    long quantity = findQuantity(product);
+
+                    if (quantity > 0) {
+                        return SellableProductDTO.builder()
+                                .id(product.getId())
+                                .name(product.getName())
+                                .price(product.getPrice())
+                                .containArticles(toDto(product.getContainArticles()))
+                                .quantity(quantity)
+                                .build();
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private List<ProductArticleDTO> toDto(List<Product.ArticleQuantity> containArticles) {
+        return containArticles.stream().map(conArt ->
+                        ProductArticleDTO.builder()
+                                .articleId(conArt.getArticleId())
+                                .amountOf(Long.toString(conArt.getQuantity()))
+                                .build())
                 .collect(Collectors.toList());
     }
 
@@ -147,7 +172,7 @@ public class ProductService {
 
         Product product = productOpt.get();
 
-        if (!checkInventory(product)) {
+        if (findQuantity(product) <= 0) {
             logger.warn("Product with ID {} is sold out!", id);
             throw new ProductSoldOutException(id);
         }
@@ -164,19 +189,29 @@ public class ProductService {
     }
 
     /**
-     * Checks the inventory availability for the specified product.
+     * Determines how many units of a product can be made based on the available stock of the required articles.
+     * The method calculates the maximum number of products that can be produced with the current inventory,
+     * considering the quantities of each article required to produce one unit of the product.
      *
-     * @param product the product to check.
-     * @return true if all required articles are available in sufficient quantity; false otherwise.
+     * @param product the product whose sellable quantity is being calculated.
+     * @return the maximum number of units of the product that can be made based on the available stock of the articles.
+     *         Returns 0 if any required article is missing from the inventory.
      */
-    private boolean checkInventory(Product product) {
-        return product.getContainArticles().stream()
-                .allMatch(articleQuantity -> {
-                    String articleId = articleQuantity.getArticleId();
-                    Long quantityNeeded = articleQuantity.getQuantity();
-                    return inventoryRepository.findById(articleId)
-                            .map(inventory -> inventory.getStock() >= quantityNeeded)
-                            .orElse(false);
-                });
+    private Long findQuantity(Product product) {
+        List<Product.ArticleQuantity> neededArticles = product.getContainArticles();
+
+        long minAvailableProducts = Long.MAX_VALUE;
+        for (Product.ArticleQuantity neededArticle : neededArticles) {
+            long availableProducts;
+            Optional<Inventory> articleInInventory = inventoryRepository.findById(neededArticle.getArticleId());
+            if (articleInInventory.isEmpty()) {
+                return 0L;
+            }
+            availableProducts = articleInInventory.get().getStock() / neededArticle.getQuantity();
+            if (availableProducts < minAvailableProducts) {
+                minAvailableProducts = availableProducts;
+            }
+        }
+        return minAvailableProducts;
     }
 }

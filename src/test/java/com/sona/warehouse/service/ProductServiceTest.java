@@ -2,6 +2,7 @@ package com.sona.warehouse.service;
 
 import com.sona.warehouse.dto.ProductArticleDTO;
 import com.sona.warehouse.dto.ProductDTO;
+import com.sona.warehouse.dto.SellableProductDTO;
 import com.sona.warehouse.exceptions.ProductNotFoundException;
 import com.sona.warehouse.exceptions.ProductSoldOutException;
 import com.sona.warehouse.model.Inventory;
@@ -88,7 +89,7 @@ class ProductServiceTest {
         when(productRepository.findAll()).thenReturn(List.of(sampleProduct));
         when(inventoryRepository.findById("1")).thenReturn(Optional.of(sampleInventory));
 
-        List<Product> products = productService.findAll();
+        List<SellableProductDTO> products = productService.findAll();
 
         assertEquals(1, products.size());
         assertEquals("Dining Chair", products.get(0).getName());
@@ -100,7 +101,7 @@ class ProductServiceTest {
         when(productRepository.findAll()).thenReturn(List.of(sampleProduct));
         when(inventoryRepository.findById("1")).thenReturn(Optional.of(sampleInventory));
 
-        List<Product> products = productService.findAll();
+        List<SellableProductDTO> products = productService.findAll();
 
         assertEquals(0, products.size());
     }
