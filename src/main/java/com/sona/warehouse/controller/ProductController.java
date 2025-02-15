@@ -89,6 +89,8 @@ public class ProductController {
             productService.saveAll(uploaded.getProducts());
             return ResponseEntity.ok("Products uploaded successfully!");
 
+        } catch (CustomHttpStatusCodeException e) {
+            return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
         } catch (JsonMappingException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid JSON format: " + e.getMessage());
         } catch (JsonProcessingException e) {

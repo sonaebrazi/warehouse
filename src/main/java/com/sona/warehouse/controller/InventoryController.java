@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sona.warehouse.dto.InventoryDTO;
+import com.sona.warehouse.exceptions.CustomHttpStatusCodeException;
 import com.sona.warehouse.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -58,6 +59,8 @@ public class InventoryController {
             inventoryService.saveAll(inventory);
             return ResponseEntity.ok("Inventory uploaded successfully!");
 
+        }catch (CustomHttpStatusCodeException e) {
+            return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
         } catch (JsonMappingException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid JSON format: " + e.getMessage());
         } catch (JsonProcessingException e) {

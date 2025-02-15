@@ -2,6 +2,7 @@ package com.sona.warehouse.service;
 
 import com.sona.warehouse.dto.InventoryArticleDTO;
 import com.sona.warehouse.dto.InventoryDTO;
+import com.sona.warehouse.exceptions.CustomNumberFormatException;
 import com.sona.warehouse.model.Inventory;
 import com.sona.warehouse.repository.InventoryRepository;
 import org.slf4j.Logger;
@@ -39,19 +40,26 @@ public class InventoryService {
      * based on the provided inventory data.
      *
      * @param inventory the DTO containing a list of inventory articles to be saved.
+     *@throws CustomNumberFormatException if the stock field is not a valid number.
      */
     @Transactional
-    public void saveAll(InventoryDTO inventory) {
+    public void saveAll(InventoryDTO inventory) throws CustomNumberFormatException {
         logger.info("Saving inventory with {} items", inventory.getInventory().size());
 
         for (InventoryArticleDTO articleDTO : inventory.getInventory()) {
             Optional<Inventory> existingInventory = inventoryRepository.findById(articleDTO.getArticleId());
 
             if (existingInventory.isPresent()) {
-                Inventory existing = existingInventory.get();
-                existing.setStock(existing.getStock() + Long.parseLong(articleDTO.getStock()));
-                inventoryRepository.save(existing);
-                logger.debug("Updated stock for articleId {}: new stock {}", articleDTO.getArticleId(), existing.getStock());
+                try {
+                    Long stock = Long.parseLong(articleDTO.getStock());
+                    Inventory existing = existingInventory.get();
+                    existing.setStock(existing.getStock() +  stock );
+                    inventoryRepository.save(existing);
+                    logger.debug("Updated stock for articleId {}: new stock {}", articleDTO.getArticleId(), existing.getStock());
+                } catch (NumberFormatException e) {
+                    throw new CustomNumberFormatException(articleDTO.getStock());
+                }
+
             } else {
                 inventoryRepository.save(toModel(articleDTO));
                 logger.info("Added new inventory item: {}", articleDTO.getArticleId());
@@ -65,11 +73,16 @@ public class InventoryService {
      * @param articleDTO the InventoryArticleDTO to be converted.
      * @return the corresponding Inventory model.
      */
-    private Inventory toModel(InventoryArticleDTO articleDTO) {
-        return Inventory.builder()
-                .articleId(articleDTO.getArticleId())
-                .stock(Long.parseLong(articleDTO.getStock()))
-                .name(articleDTO.getName())
-                .build();
+    private Inventory toModel(InventoryArticleDTO articleDTO) throws CustomNumberFormatException{
+        try {
+            Long stock = Long.parseLong(articleDTO.getStock());
+            return Inventory.builder()
+                    .articleId(articleDTO.getArticleId())
+                    .stock(stock)
+                    .name(articleDTO.getName())
+                    .build();
+        } catch (NumberFormatException e) {
+            throw new CustomNumberFormatException(articleDTO.getStock());
+        }
     }
 }

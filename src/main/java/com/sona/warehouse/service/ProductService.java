@@ -3,6 +3,7 @@ package com.sona.warehouse.service;
 import com.sona.warehouse.dto.ProductArticleDTO;
 import com.sona.warehouse.dto.ProductDTO;
 import com.sona.warehouse.exceptions.ArticleNotFoundException;
+import com.sona.warehouse.exceptions.CustomNumberFormatException;
 import com.sona.warehouse.exceptions.ProductNotFoundException;
 import com.sona.warehouse.exceptions.ProductSoldOutException;
 import com.sona.warehouse.model.Inventory;
@@ -50,9 +51,10 @@ public class ProductService {
      * based on the provided product data.
      *
      * @param productDTOs the list of ProductDTOs to be saved.
+     * @throws CustomNumberFormatException if the amountOf field is not a valid number.
      */
     @Transactional
-    public void saveAll(List<ProductDTO> productDTOs) {
+    public void saveAll(List<ProductDTO> productDTOs) throws CustomNumberFormatException {
         logger.info("Saving {} products", productDTOs.size());
         for (ProductDTO productDTO : productDTOs) {
             Optional<Product> existingProduct = productRepository.findByName(productDTO.getName());
@@ -95,12 +97,18 @@ public class ProductService {
      *
      * @param articleDTO the ProductArticleDTO to be converted.
      * @return the corresponding Product.ArticleQuantity model.
+     * @throws CustomNumberFormatException if the amountOf field is not a valid number.
      */
-    private Product.ArticleQuantity toModel(ProductArticleDTO articleDTO) {
-        return Product.ArticleQuantity.builder()
-                .articleId(articleDTO.getArticleId())
-                .quantity(Long.parseLong(articleDTO.getAmountOf()))
-                .build();
+    private Product.ArticleQuantity toModel(ProductArticleDTO articleDTO) throws CustomNumberFormatException {
+        try {
+            long amountOf = Long.parseLong(articleDTO.getAmountOf());
+            return Product.ArticleQuantity.builder()
+                    .articleId(articleDTO.getArticleId())
+                    .quantity(amountOf)
+                    .build();
+        } catch (NumberFormatException e) {
+            throw new CustomNumberFormatException(articleDTO.getAmountOf());
+        }
     }
 
     /**
