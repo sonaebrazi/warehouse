@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(SpringExtension.class)
 class IntegrationTest {
 
+    protected static final int OUTPUT_MONGODB_PORT = 27018;
     private static final int MONGODB_PORT = 27017;
 
     @Container
@@ -51,7 +52,7 @@ class IntegrationTest {
         return new MongoDBContainer(DockerImageName.parse("mongo:latest"))
                 .withExposedPorts(MONGODB_PORT)
                 .withCreateContainerCmdModifier(cmd -> cmd.withPortBindings(
-                        new PortBinding(Ports.Binding.bindPort(MONGODB_PORT), new ExposedPort(MONGODB_PORT))
+                        new PortBinding(Ports.Binding.bindPort(OUTPUT_MONGODB_PORT), new ExposedPort(MONGODB_PORT))
                 ));
     }
 
